@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>파티 게임</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <!-- PeerJS: 브라우저끼리 직접 연결 (전역 Peer) -->
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js"></script>
+    <!-- Three.js: ES 모듈로 불러오기 -->
+    <script type="importmap">
+      { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }
+    </script>
+  </head>
+  <body>
+    <canvas id="game-canvas"></canvas>
+
+    <!-- 로비 -->
+    <div id="lobby" class="overlay">
+      <div class="panel">
+        <h1 class="game-title">파티 게임</h1>
+
+        <div id="lobby-start">
+          <label class="field">
+            <span>닉네임</span>
+            <input id="name-input" maxlength="12" autocomplete="off" placeholder="최대 12자" />
+          </label>
+          <button id="create-btn" class="btn primary">방 만들기</button>
+          <div class="divider"><span>또는 방 코드로 참가</span></div>
+          <div class="join-row">
+            <input id="code-input" maxlength="4" placeholder="방 코드" autocomplete="off" spellcheck="false" />
+            <button id="join-btn" class="btn">참가</button>
+          </div>
+          <p id="lobby-status" class="status"></p>
+        </div>
+
+        <div id="lobby-room" hidden>
+          <div class="room-code-row">
+            <span class="label">방 코드</span>
+            <span id="room-code" class="room-code"></span>
+            <button id="copy-link-btn" class="btn small">초대 링크 복사</button>
+          </div>
+          <h2 class="section">참가자 <span id="player-count" class="muted"></span></h2>
+          <ul id="player-list" class="player-list"></ul>
+          <div id="host-settings">
+            <div class="settings-row">
+              <label class="field inline"><span>최대 인원</span><select id="max-players-select"></select></label>
+              <label class="field inline"><span>라운드 수</span><select id="rounds-select"></select></label>
+            </div>
+            <button id="start-btn" class="btn primary">게임 시작</button>
+          </div>
+          <p id="guest-wait" class="status"></p>
+          <p id="room-status" class="status"></p>
+          <button id="leave-btn" class="btn ghost">나가기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 게임 중 HUD -->
+    <div id="hud" hidden>
+      <div id="hud-top-left" class="hud-box">
+        <div id="hud-round"></div>
+        <div id="hud-alive"></div>
+      </div>
+      <div id="hud-scores" class="hud-box">
+        <div class="hud-title">점수</div>
+        <ol id="hud-score-list"></ol>
+      </div>
+      <div id="hud-intro" hidden>
+        <div id="intro-round"></div>
+        <div id="intro-title"></div>
+        <div id="intro-desc"></div>
+      </div>
+      <div id="hud-countdown" hidden></div>
+      <div id="hud-flash" hidden></div>
+      <ul id="hud-feed"></ul>
+      <div id="hud-hint" class="hud-box" hidden></div>
+    </div>
+
+    <!-- 결과 화면 -->
+    <div id="result-panel" class="overlay" hidden>
+      <div class="panel">
+        <h2 id="result-title"></h2>
+        <table class="result-table">
+          <thead>
+            <tr><th>순위</th><th>이름</th><th id="result-points-header">획득</th><th>총점</th></tr>
+          </thead>
+          <tbody id="result-body"></tbody>
+        </table>
+        <p id="result-note" class="status"></p>
+        <button id="to-lobby-btn" class="btn primary" hidden>로비로 돌아가기</button>
+      </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>
