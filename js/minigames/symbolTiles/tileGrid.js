@@ -1,9 +1,8 @@
 import * as THREE from 'three';
 import { cellCenter, tileCountOf } from './symbolTilesRules.js';
-import { makeRustMetalTexture, makeTilePlateTexture } from '../../render/proceduralTextures.js';
+import { makeTilePlateTexture } from '../../render/proceduralTextures.js';
 
-// 8×6 바닥 타일과 그 사이의 철제 격자 틀.
-// 틀은 타일이 떨어져도 그대로 남아서, 뚫린 칸 아래로 깊이가 보이게 한다.
+// 8×6 바닥 타일. 타일 사이에 틀이 없어서, 떨어진 칸은 완전한 허공으로 보인다.
 export class TileGrid {
   constructor(layout, cfg, symbolSet) {
     this.layout = layout;
@@ -48,29 +47,8 @@ export class TileGrid {
       });
     }
 
-    this._buildFrame(layout, cfg);
   }
 
-  _buildFrame(layout, cfg) {
-    const mat = new THREE.MeshStandardMaterial({ map: makeRustMetalTexture({ seed: 61 }), roughness: 0.75, metalness: 0.5 });
-    const h = 0.6;
-    const t = cfg.tileGap;
-    const alongZ = new THREE.BoxGeometry(t, h, layout.depth + t);
-    const alongX = new THREE.BoxGeometry(layout.width + t, h, t);
-    this._disposables.push(mat, mat.map, alongZ, alongX);
-    for (let c = 0; c <= layout.cols; c++) {
-      const m = new THREE.Mesh(alongZ, mat);
-      m.position.set(layout.x0 + c * layout.pitch, -h / 2, 0);
-      m.castShadow = m.receiveShadow = true;
-      this.group.add(m);
-    }
-    for (let r = 0; r <= layout.rows; r++) {
-      const m = new THREE.Mesh(alongX, mat);
-      m.position.set(0, -h / 2, layout.z0 + r * layout.pitch);
-      m.castShadow = m.receiveShadow = true;
-      this.group.add(m);
-    }
-  }
 
   /** y: 높이, visible: 보임 여부, tumble: 0~1 떨어지며 기우는 정도 */
   setTile(i, y, visible, tumble = 0) {
