@@ -1,0 +1,464 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #050605;
+  color: #e6ebe7;
+  font-family: system-ui, -apple-system, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+#game-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ---------- 공통 패널 ---------- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 10;
+}
+
+.panel {
+  width: min(420px, calc(100% - 32px));
+  background: rgba(13, 16, 14, 0.94);
+  border: 1px solid #2b322d;
+  border-radius: 10px;
+  padding: 24px;
+}
+
+.game-title {
+  margin: 0 0 20px;
+  font-size: 28px;
+  letter-spacing: 0.02em;
+}
+
+h2 {
+  margin: 0 0 14px;
+  font-size: 20px;
+}
+
+h2.section {
+  margin-top: 18px;
+  font-size: 15px;
+}
+
+.muted {
+  color: #8d968f;
+  font-weight: normal;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  color: #a9b2ab;
+}
+
+.field.inline {
+  flex: 1;
+}
+
+input,
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid #353d37;
+  background: #0a0c0b;
+  color: #e6ebe7;
+  font-size: 15px;
+  font-family: inherit;
+}
+
+input:focus,
+select:focus {
+  outline: 2px solid #3ddc6a;
+  outline-offset: 1px;
+}
+
+.btn {
+  display: block;
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 6px;
+  border: 1px solid #3a433c;
+  background: #1a1f1b;
+  color: #e6ebe7;
+  font-size: 15px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.btn:hover:not(:disabled) {
+  background: #232a25;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.btn.primary {
+  background: #2f9e52;
+  border-color: #2f9e52;
+  color: #fff;
+  font-weight: 600;
+}
+
+.btn.primary:hover:not(:disabled) {
+  background: #36b25d;
+}
+
+.btn.ghost {
+  margin-top: 10px;
+  background: transparent;
+}
+
+.btn.small {
+  width: auto;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 12px;
+  color: #7c857e;
+  font-size: 12px;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #2b322d;
+}
+
+.join-row {
+  display: flex;
+  gap: 8px;
+}
+
+.join-row input {
+  flex: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  font-weight: 600;
+}
+
+.join-row .btn {
+  width: 90px;
+}
+
+.status {
+  min-height: 1.2em;
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: #a9b2ab;
+}
+
+.status.error {
+  color: #ff7b6b;
+}
+
+.room-code-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.room-code-row .label {
+  font-size: 13px;
+  color: #a9b2ab;
+}
+
+.room-code {
+  flex: 1;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: #6dff8f;
+}
+
+.player-list {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+}
+
+.player-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-bottom: 1px solid #1f2521;
+}
+
+.player-list .name {
+  flex: 1;
+}
+
+.player-list .tag {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #2a312c;
+  color: #c8d0ca;
+}
+
+.player-list .tag.me {
+  background: #224d30;
+}
+
+.settings-row {
+  display: flex;
+  gap: 10px;
+}
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+
+/* ---------- HUD ---------- */
+#hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.hud-box {
+  position: absolute;
+  background: rgba(8, 10, 9, 0.7);
+  border: 1px solid #262d28;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+#hud-top-left {
+  top: 16px;
+  left: 16px;
+}
+
+#hud-round {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+#hud-alive {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #6dff8f;
+}
+
+#hud-scores {
+  top: 16px;
+  right: 16px;
+  min-width: 190px;
+}
+
+.hud-title {
+  font-size: 12px;
+  color: #8d968f;
+  margin-bottom: 6px;
+}
+
+#hud-score-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#hud-score-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+  font-size: 14px;
+}
+
+#hud-score-list .rank {
+  width: 16px;
+  color: #8d968f;
+  font-size: 12px;
+}
+
+#hud-score-list .name {
+  flex: 1;
+}
+
+#hud-score-list .total {
+  font-weight: 700;
+}
+
+#hud-score-list li.me .name {
+  font-weight: 700;
+}
+
+#hud-score-list li.out {
+  opacity: 0.4;
+}
+
+#hud-intro {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(560px, calc(100% - 32px));
+  text-align: center;
+  background: rgba(8, 10, 9, 0.85);
+  border: 1px solid #2b322d;
+  border-radius: 10px;
+  padding: 22px 26px;
+}
+
+#intro-round {
+  font-size: 13px;
+  color: #8d968f;
+}
+
+#intro-title {
+  margin: 6px 0 10px;
+  font-size: 34px;
+  font-weight: 800;
+  color: #6dff8f;
+}
+
+#intro-desc {
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* 카운트다운은 바닥을 가리지 않게 화면 아래쪽(앞 턱 위)에 표시 */
+#hud-countdown {
+  position: absolute;
+  left: 50%;
+  bottom: 62px;
+  transform: translateX(-50%);
+  font-size: 72px;
+  font-weight: 800;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 0 18px rgba(0, 0, 0, 0.9);
+}
+
+#hud-countdown.pop {
+  animation: pop 0.5s ease-out;
+}
+
+@keyframes pop {
+  from {
+    transform: translateX(-50%) scale(1.5);
+    opacity: 0.3;
+  }
+  to {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+}
+
+#hud-flash {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 46px;
+  font-weight: 800;
+  color: #ff6b5b;
+  text-shadow: 0 0 16px rgba(0, 0, 0, 0.9);
+}
+
+#hud-feed {
+  position: absolute;
+  left: 16px;
+  bottom: 70px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#hud-feed li {
+  margin-top: 6px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: rgba(8, 10, 9, 0.7);
+  font-size: 13px;
+}
+
+#hud-hint {
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  font-size: 13px;
+  color: #c8d0ca;
+  white-space: nowrap;
+}
+
+/* ---------- 결과표 ---------- */
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.result-table th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: normal;
+  color: #8d968f;
+  padding: 6px 8px;
+  border-bottom: 1px solid #2b322d;
+}
+
+.result-table td {
+  padding: 8px;
+  border-bottom: 1px solid #1f2521;
+}
+
+.result-table td.name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.result-table td.points {
+  color: #6dff8f;
+}
+
+.result-table td.total {
+  font-weight: 700;
+}
+
+.result-table tr.me td {
+  background: rgba(61, 220, 106, 0.08);
+}
+
+#to-lobby-btn {
+  margin-top: 16px;
+}
