@@ -57,7 +57,7 @@ export const CONFIG = {
     cols: 8,
     rows: 6,
     tileSize: 2.0,
-    tileGap: 0.2,
+    tileGap: 0.1,
     tileThickness: 0.45,
 
     firstRoundDelay: 1.5,   // 시작 후 첫 깜빡임까지 (초)
