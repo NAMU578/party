@@ -139,7 +139,7 @@ class SymbolTilesGame extends MinigameBase {
     if (idx < 0 || this.gone[idx]) return false;
     const R = this.round;
     if (!R) return true;
-    return isTileSolidAt(t, this.times, R.falling.has(idx), R.removed.has(idx));
+    return isTileSolidAt(t, this.times, R.falling.has(idx), R.removed.has(idx), CFG.solidLead);
   }
 
   /** 내 발 중심이 있는 칸이 꺼졌으면 떨어지고 방장에게 보고 */
@@ -208,6 +208,11 @@ class SymbolTilesGame extends MinigameBase {
   _hostNextRound() {
     const h = this.h;
     if (h.ended) return;
+    // 탈락 직후 종료 확인을 기다리는 중이면 새 라운드를 시작하지 않고 바로 끝낸다
+    if (h.alive.size <= (h.startCount > 1 ? 1 : 0)) {
+      this._hostFinish();
+      return;
+    }
     const plan = planRound(h.tileAlive, h.rng, CFG);
     h.round += 1;
     h.tileAlive = applyRemoval(h.tileAlive, plan.removed);

@@ -5,8 +5,8 @@
 //   3초       기호 확정
 //   6초       벽 기호와 다른 타일이 떨어짐
 //   6 ~ 10초  떨어진 상태 유지
-//   10 ~ 14초 타일이 다시 올라옴 (영구 제거 타일 제외)
-//   14초      완전 수복 → 다음 라운드
+//   10 ~ 13초 타일이 다시 올라옴 (영구 제거 타일 제외), 13초부터 밟을 수 있음
+//   14초      다음 라운드
 
 export function roundTimes(cfg) {
   const decideAt = cfg.flickerCount * cfg.flickerInterval;
@@ -41,15 +41,16 @@ export function fallingTileY(t, times, cfg, removed, gravity) {
     return Math.max(-cfg.pitDepth, -0.5 * gravity * s * s);
   }
   if (removed) return null;
-  const u = Math.min(1, (t - times.riseAt) / cfg.riseDuration);
-  const ease = 1 - (1 - u) ** 3;
+  // 마지막에 느려지는 정도를 줄이려고 3제곱 대신 2제곱 감속, 다 올라온 시점 = 밟을 수 있는 시점
+  const u = Math.min(1, (t - times.riseAt) / (cfg.riseDuration - cfg.solidLead));
+  const ease = 1 - (1 - u) ** 2;
   return -cfg.riseStartDepth * (1 - ease);
 }
 
 /** 그 칸을 밟고 서 있을 수 있는가 */
-export function isTileSolidAt(t, times, falling, removed) {
+export function isTileSolidAt(t, times, falling, removed, solidLead = 0) {
   if (!falling) return true;
   if (t < times.dropAt) return true;
   if (removed) return false;
-  return t >= times.endAt;
+  return t >= times.endAt - solidLead;
 }
