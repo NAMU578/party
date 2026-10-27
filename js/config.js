@@ -31,7 +31,20 @@ export const CONFIG = {
     gravity: 22,          // 탈락 시 떨어지는 가속도 (타일도 같은 값으로 떨어진다)
     fallHideDepth: 50,    // 이 깊이보다 더 떨어지면 캐릭터를 숨김
     remoteSmoothing: 14,  // 다른 플레이어 위치 보간 속도
+    radius: 0.38,         // 충돌 반지름 (두 사람 중심이 이 값의 2배보다 가까워지지 않음)
     colors: ['#e8524a', '#3d8bfd', '#f2c94c', '#9b59d0', '#2fbf9b', '#f2994a', '#e85fa8', '#a0a8b8'],
+  },
+
+  push: {
+    range: 1.3,             // 밀치기 사거리 (두 사람 몸 중심 사이 거리, 타일 한 칸은 2.0)
+    halfAngleDeg: 50,       // 정면 기준 좌우 판정 각도
+    lockTime: 0.25,         // 밀치는 동안 멈춰 있는 시간 (헛스윙하면 빈틈)
+    cooldown: 1.0,          // 다시 밀 수 있을 때까지
+    knockbackDistance: 3.0, // 맞은 사람이 밀려나는 거리
+    knockbackTime: 0.45,    // 밀려나며 넘어지는 시간
+    downTime: 0.8,          // 누운 채 경직되는 시간
+    getUpTime: 0.6,         // 손 짚고 일어나는 시간 (이 동작이 시작될 때부터 이동 가능)
+    hostRangeSlack: 1.5,    // 방장이 거리를 확인할 때 허용하는 오차 (통신 지연 고려)
   },
 
   camera: {

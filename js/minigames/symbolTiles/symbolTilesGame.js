@@ -36,7 +36,6 @@ class SymbolTilesGame extends MinigameBase {
     this.gone = new Array(this.count).fill(false); // 이전 라운드까지 영구 제거된 타일
     this.round = null;
     this.visualRng = createRng(randomSeed());
-    this.lastCountdown = null;
     this.h = null; // 방장 전용 상태
     this.finishTimer = null;
   }
@@ -55,7 +54,7 @@ class SymbolTilesGame extends MinigameBase {
   }
 
   begin() {
-    this.ctx.hud.setHint('WASD로 이동 · 벽의 기호와 같은 타일만 남습니다');
+    this.ctx.hud.setHint('WASD 이동 · 스페이스바 밀치기 · 벽의 기호와 같은 타일만 남습니다');
     if (this.isHost) this._hostBegin();
   }
 
@@ -65,7 +64,6 @@ class SymbolTilesGame extends MinigameBase {
     const t = (performance.now() - this.round.start) / 1000;
     this._render(t);
     this._checkLocalFall(t);
-    this._updateCountdown(t);
   }
 
   onEvent(d) {
@@ -180,15 +178,6 @@ class SymbolTilesGame extends MinigameBase {
     view.fall(elapsed);
   }
 
-  _updateCountdown(t) {
-    let n = null;
-    if (t >= this.times.decideAt && t < this.times.dropAt) n = Math.ceil(this.times.dropAt - t);
-    if (n !== this.lastCountdown) {
-      this.lastCountdown = n;
-      this.ctx.hud.setCountdown(n);
-    }
-  }
-
   // ===== 방장 전용 =====
 
   _hostBegin() {
@@ -289,7 +278,6 @@ class SymbolTilesGame extends MinigameBase {
     super.dispose();
     if (this.h) for (const id of this.h.timers) clearTimeout(id);
     clearTimeout(this.finishTimer);
-    this.ctx.hud.setCountdown(null);
     this.grid?.dispose();
     this.panels?.dispose();
     this.pit?.userData.dispose();
@@ -300,7 +288,7 @@ class SymbolTilesGame extends MinigameBase {
 export const symbolTilesDef = {
   id: 'symbolTiles',
   title: '기호 타일',
-  description: '벽에 뜬 기호와 같은 타일만 남고 나머지는 떨어집니다. 3초 안에 같은 기호 위로 이동하세요!',
+  description: '벽에 뜬 기호와 같은 타일만 남고 나머지는 떨어집니다. 서둘러 같은 기호 위로 이동하세요!',
   computeSpawns(roster) {
     const layout = gridLayout(CFG);
     const cells = pickSpawnCells(layout, roster.length, createRng(randomSeed()));

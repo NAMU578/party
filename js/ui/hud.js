@@ -19,7 +19,6 @@ export class Hud {
     this.introRound = $('intro-round');
     this.introTitle = $('intro-title');
     this.introDesc = $('intro-desc');
-    this.countdownEl = $('hud-countdown');
     this.flashEl = $('hud-flash');
     this.feedEl = $('hud-feed');
     this.hintEl = $('hud-hint');
@@ -69,18 +68,6 @@ export class Hud {
     this.introEl.hidden = true;
   }
 
-  setCountdown(n) {
-    if (n == null) {
-      this.countdownEl.hidden = true;
-      return;
-    }
-    this.countdownEl.textContent = String(n);
-    this.countdownEl.hidden = false;
-    this.countdownEl.classList.remove('pop');
-    void this.countdownEl.offsetWidth; // 애니메이션 다시 시작
-    this.countdownEl.classList.add('pop');
-  }
-
   flash(text, ms = 1500) {
     this.flashEl.textContent = text;
     this.flashEl.hidden = false;
@@ -104,7 +91,6 @@ export class Hud {
 
   clearTransient() {
     this.hideIntro();
-    this.setCountdown(null);
     this.flashEl.hidden = true;
     this.feedEl.replaceChildren();
     this.setHint('');
