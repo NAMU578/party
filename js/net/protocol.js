@@ -6,6 +6,7 @@ export const MSG = Object.freeze({
   // 양방향
   PING: 'ping',
   MG: 'mg',         // { d } 미니게임 전용 데이터
+  PUSH: 'push',     // 참가자→방장 { to, dx, dz } / 방장→모두 { from, to, dx, dz } (to가 null이면 헛스윙)
   // 방장 → 참가자
   REJECT: 'reject', // { reason }
   LOBBY: 'lobby',   // { players, hostId, settings, code }

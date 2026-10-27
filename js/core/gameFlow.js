@@ -79,6 +79,8 @@ export class GameFlow {
       matchIndex: 0,
       roster: [],
       positions: {},
+      knockUntil: {},  // 넘어져 있는 동안 (이 시각까지 밀 수도, 맞을 수도 없음)
+      pushReadyAt: {}, // 다시 밀 수 있는 시각
       timer: null,
     };
     this._hostAddPlayer(this.network.myId, name);
@@ -188,6 +190,8 @@ export class GameFlow {
     H.phase = 'intro';
     H.roster = roster;
     H.positions = {};
+    H.knockUntil = {};
+    H.pushReadyAt = {};
     const spawns = def.computeSpawns(roster);
     for (const id of roster) H.positions[id] = [spawns[id][0], spawns[id][1], 0, 0];
 
@@ -259,9 +263,45 @@ export class GameFlow {
       case MSG.MG:
         if (H.phase === 'playing' && this.minigame && H.roster.includes(from)) this.minigame.onHostEvent(from, msg.d || {});
         break;
+      case MSG.PUSH:
+        this._hostOnPush(from, msg);
+        break;
       default:
         break;
     }
+  }
+
+  /** 밀치기 확인: 민 사람 화면 기준 판정을 거리·상태로 한 번 더 확인하고 모두에게 알린다 */
+  _hostOnPush(from, msg) {
+    const H = this.host;
+    if (H.phase !== 'playing' || !H.roster.includes(from)) return;
+    const now = performance.now();
+    const cfg = CONFIG.push;
+    if ((H.knockUntil[from] || 0) > now || (H.pushReadyAt[from] || 0) > now) return;
+    H.pushReadyAt[from] = now + cfg.cooldown * 800; // 통신 지연을 감안해 조금 느슨하게
+
+    let dx = Number(msg.dx);
+    let dz = Number(msg.dz);
+    const len = Math.hypot(dx, dz);
+    if (!Number.isFinite(len) || len < 1e-6) {
+      dx = 0;
+      dz = 1;
+    } else {
+      dx /= len;
+      dz /= len;
+    }
+
+    let to = null;
+    const a = H.positions[from];
+    const b = H.positions[msg.to];
+    if (typeof msg.to === 'string' && msg.to !== from && H.roster.includes(msg.to) && a && b) {
+      const inRange = Math.hypot(b[0] - a[0], b[1] - a[1]) <= cfg.range + cfg.hostRangeSlack;
+      if (inRange && (H.knockUntil[msg.to] || 0) <= now) {
+        to = msg.to;
+        H.knockUntil[to] = now + (cfg.knockbackTime + cfg.downTime + cfg.getUpTime) * 1000;
+      }
+    }
+    this.network.broadcast(makeMsg(MSG.PUSH, { from, to, dx: Math.round(dx * 100) / 100, dz: Math.round(dz * 100) / 100 }));
   }
 
   _hostOnHello(from, msg) {
@@ -321,6 +361,9 @@ export class GameFlow {
       case MSG.SNAP:
         this._clientSnap(msg);
         break;
+      case MSG.PUSH:
+        this._clientPush(msg);
+        break;
       case MSG.RESULT:
         this._clientResult(msg);
         break;
@@ -375,7 +418,12 @@ export class GameFlow {
     }
     this.local = null;
     if (this.roster.includes(S.myId)) {
-      this.local = new PlayerController({ view: this.views.get(S.myId), input: this.input, network: this.network });
+      this.local = new PlayerController({
+        view: this.views.get(S.myId),
+        input: this.input,
+        network: this.network,
+        others: () => this._otherBodies(),
+      });
       const [x, z] = msg.spawns[S.myId] || [0, 0];
       this.local.spawn(x, z);
     }
@@ -403,6 +451,14 @@ export class GameFlow {
       const view = this.views.get(id);
       if (view) view.setTarget(s[0], s[1], s[2], s[3]);
     }
+  }
+
+  _clientPush(msg) {
+    const myId = this.session.myId;
+    if (msg.from !== myId) this.views.get(msg.from)?.playPush(); // 내 동작은 누르는 순간 이미 재생함
+    if (!msg.to) return;
+    if (msg.to === myId) this.local?.knockback(msg.dx, msg.dz);
+    else this.views.get(msg.to)?.knockdown(msg.dx, msg.dz);
   }
 
   _clientResult(msg) {
@@ -478,6 +534,17 @@ export class GameFlow {
         this._refreshHud();
       },
     };
+  }
+
+  /** 내 캐릭터가 부딪히거나 밀 수 있는 다른 플레이어 (탈락·낙하 중인 사람 제외) */
+  _otherBodies() {
+    const myId = this.session.myId;
+    const out = [];
+    for (const [id, v] of this.views) {
+      if (id === myId || this.eliminated.has(id) || v.falling || !v.root.visible) continue;
+      out.push({ id, x: v.root.position.x, z: v.root.position.z, knocked: v.knocked });
+    }
+    return out;
   }
 
   _refreshHud() {

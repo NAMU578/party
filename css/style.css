@@ -355,34 +355,6 @@ select:focus {
   line-height: 1.5;
 }
 
-/* 카운트다운은 바닥을 가리지 않게 화면 아래쪽(앞 턱 위)에 표시 */
-#hud-countdown {
-  position: absolute;
-  left: 50%;
-  bottom: 62px;
-  transform: translateX(-50%);
-  font-size: 72px;
-  font-weight: 800;
-  line-height: 1;
-  color: #fff;
-  text-shadow: 0 0 18px rgba(0, 0, 0, 0.9);
-}
-
-#hud-countdown.pop {
-  animation: pop 0.5s ease-out;
-}
-
-@keyframes pop {
-  from {
-    transform: translateX(-50%) scale(1.5);
-    opacity: 0.3;
-  }
-  to {
-    transform: translateX(-50%) scale(1);
-    opacity: 1;
-  }
-}
-
 #hud-flash {
   position: absolute;
   top: 40%;
