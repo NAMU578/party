@@ -9,7 +9,7 @@ import { makeConcreteTexture, makeRustMetalTexture, withRepeat } from '../../ren
 const FADE = 7; // 이 깊이만큼 내려갈 때마다 밝기가 약 37%로 줄어듦
 
 function shadeAt(worldY) {
-  return 0.02 + 0.98 * Math.exp(Math.min(0, worldY) / FADE);
+  return 0.02 + 0.43 * Math.exp(Math.min(0, worldY) / FADE); // 입구도 판보다 확실히 어둡게
 }
 
 /** 기하 정점마다 깊이에 따른 밝기를 정점 색으로 넣는다 (offsetY: 메시가 놓일 높이) */
@@ -62,7 +62,7 @@ export function createPit(layout, { depth }) {
   const ledgeT = 0.35;
   const ledgeH = 0.3;
   for (let y = -5; y > -depth; y -= 8) {
-    const s = shadeAt(y) * 0.15;
+    const s = shadeAt(y) * 0.1;
     const mat = new THREE.MeshStandardMaterial({ color: new THREE.Color(s, s * 0.96, s * 0.9), roughness: 0.9 });
     disposables.push(mat);
     const pieces = [
@@ -97,7 +97,7 @@ export function createPit(layout, { depth }) {
       group.add(lamp);
     }
   }
-  const glow = new THREE.PointLight(0xff7a20, 30, 18, 2);
+  const glow = new THREE.PointLight(0xff7a20, 12, 18, 2);
   glow.position.set(0, -8, -D / 4);
   group.add(glow);
 
