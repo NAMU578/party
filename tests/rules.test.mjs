@@ -76,6 +76,9 @@ assert.equal(isTileSolidAt(6.0, T, true, false), false);
 assert.equal(isTileSolidAt(13.9, T, true, false), false);
 assert.equal(isTileSolidAt(14.0, T, true, false), true);
 assert.equal(isTileSolidAt(14.0, T, true, true), false);
+assert.equal(isTileSolidAt(12.9, T, true, false, CFG.solidLead), false);
+assert.equal(isTileSolidAt(13.0, T, true, false, CFG.solidLead), true); // 1초 일찍 밟을 수 있음
+assert.ok(fallingTileY(13.0, T, CFG, false, g) === 0, '밟을 수 있게 되는 순간 타일은 다 올라와 있음');
 assert.equal(isTileSolidAt(8, T, false, false), true);
 
 // 순위 → 점수 (공동 순위)

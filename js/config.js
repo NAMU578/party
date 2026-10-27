@@ -68,6 +68,7 @@ export const CONFIG = {
     downDuration: 4.0,      // 바닥이 떨어진 상태로 유지되는 시간 (초)
     riseDuration: 4.0,      // 타일이 다시 올라오는 시간 (초)
     riseStartDepth: 14,     // 타일이 올라오기 시작하는 깊이
+    solidLead: 1.0,         // 다음 라운드 1초 전에 다 올라와서 밟을 수 있음 (올라오는 애니메이션도 이때 끝남)
 
     removePerRound: 6,      // 매 라운드 다시 올라오지 않는 타일 수
     guaranteeSafeAbove: 6,  // 남은 타일이 이 수보다 많을 때만 '살아남는 타일 최소 1칸' 보장
