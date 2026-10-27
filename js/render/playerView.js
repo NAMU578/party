@@ -172,10 +172,14 @@ export class PlayerView {
     this.pushT = null;
   }
 
-  /** 떨어지기 시작. elapsed: 이미 떨어진 시간(초)만큼 앞당겨 시작 */
-  fall(elapsed = 0) {
+  /**
+   * 떨어지기 시작. elapsed: 이미 떨어진 시간(초)만큼 앞당겨 시작
+   * gravity가 false면 허우적대는 동작만 하고, 위치는 미니게임이 직접 옮긴다 (열차에 쓸려감 등).
+   */
+  fall(elapsed = 0, gravity = true) {
     if (this.falling) return;
     this.falling = true;
+    this.fallGravity = gravity;
     this.fallTime = Math.max(0, elapsed);
     this.fallDir = Math.random() < 0.5 ? -1 : 1;
   }
@@ -184,7 +188,7 @@ export class PlayerView {
     if (this.falling) {
       this.fallTime += dt;
       const t = this.fallTime;
-      const y = -0.5 * CONFIG.player.gravity * t * t;
+      const y = this.fallGravity ? -0.5 * CONFIG.player.gravity * t * t : this.root.position.y;
       this.root.position.y = y;
       this.body.rotation.z = Math.min(0.8, t * 0.9) * this.fallDir;
       this.armL.rotation.x = -2.7 + Math.sin(t * 17) * 0.45;

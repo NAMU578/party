@@ -30,6 +30,7 @@ export class PlayerController {
     this.alive = true;
     this.controllable = false;
     this.bounds = null; // { minX, maxX, minZ, maxZ }
+    this.constraint = null; // (x, z, prevX, prevZ) → { x, z }: 사각형이 아닌 이동 범위 (열차 피하기 통로 등)
     this.knock = null;  // 넘어진 동안: { t, dx, dz, done }
     this.pushLock = 0;
     this.pushCooldown = 0;
@@ -51,6 +52,10 @@ export class PlayerController {
     this.bounds = bounds;
   }
 
+  setConstraint(fn) {
+    this.constraint = fn;
+  }
+
   setControllable(on) {
     this.controllable = on && this.alive;
   }
@@ -60,12 +65,17 @@ export class PlayerController {
     return !!this.knock && this.knock.t < P.knockbackTime + P.downTime;
   }
 
-  /** 떨어져 탈락. elapsed: 이미 떨어지기 시작한 지 지난 시간(초) */
-  fall(elapsed = 0) {
-    if (!this.alive) return;
+  /** 탈락 처리만 한다 (연출은 부른 쪽이 정함). 이미 탈락했으면 false */
+  eliminate() {
+    if (!this.alive) return false;
     this.alive = false;
     this.controllable = false;
-    this.view.fall(elapsed);
+    return true;
+  }
+
+  /** 떨어져 탈락. elapsed: 이미 떨어지기 시작한 지 지난 시간(초) */
+  fall(elapsed = 0) {
+    if (this.eliminate()) this.view.fall(elapsed);
   }
 
   /** 밀려서 넘어짐. (dx, dz): 밀려나는 방향 */
@@ -101,6 +111,8 @@ export class PlayerController {
 
     let moving = false;
     if (this.alive) {
+      const x0 = this.x;
+      const z0 = this.z;
       if (this.knock) {
         const k = this.knock;
         k.t += dt;
@@ -133,6 +145,7 @@ export class PlayerController {
         this.x = Math.min(this.bounds.maxX, Math.max(this.bounds.minX, this.x));
         this.z = Math.min(this.bounds.maxZ, Math.max(this.bounds.minZ, this.z));
       }
+      if (this.constraint) ({ x: this.x, z: this.z } = this.constraint(this.x, this.z, x0, z0));
       this.view.setPose(this.x, this.z, this.ry, moving);
     }
     this.moving = moving;

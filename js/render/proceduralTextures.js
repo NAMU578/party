@@ -236,6 +236,46 @@ export function makeTilePlateTexture({ size = 256, seed = 5 } = {}) {
   return toTexture(canvas);
 }
 
+/** 노랑·검정 사선 경고 띠 (긁히고 바랜 페인트). 가로로 반복해서 쓴다 */
+export function makeHazardTexture({ size = 128, seed = 3 } = {}) {
+  const rng = createRng(seed);
+  const { canvas, ctx } = makeCanvas(size);
+  ctx.fillStyle = '#1b1a17';
+  ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = '#c9a227';
+  const w = size / 4;
+  for (let x = -size; x < size * 2; x += w * 2) {
+    ctx.beginPath();
+    ctx.moveTo(x, size);
+    ctx.lineTo(x + w, size);
+    ctx.lineTo(x + w + size, 0);
+    ctx.lineTo(x + size, 0);
+    ctx.closePath();
+    ctx.fill();
+  }
+  stains(ctx, size, rng, 14, '40,30,20', 0.45);
+  for (let i = 0; i < 90; i++) {
+    ctx.fillStyle = rng() < 0.5 ? 'rgba(20,18,15,0.6)' : 'rgba(120,70,30,0.35)';
+    ctx.fillRect(rng() * size, rng() * size, 1 + rng() * 4, 1 + rng() * 2);
+  }
+  return toTexture(canvas);
+}
+
+/** 가운데가 밝고 가장자리로 사라지는 둥근 빛 (재질 색을 곱해서 빨강·초록으로 쓴다) */
+export function makeGlowTexture({ size = 128 } = {}) {
+  const { canvas, ctx } = makeCanvas(size);
+  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+  g.addColorStop(0, 'rgba(255,255,255,1)');
+  g.addColorStop(0.18, 'rgba(255,255,255,0.65)');
+  g.addColorStop(0.45, 'rgba(255,255,255,0.18)');
+  g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, size, size);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
 /** 벽 패널 화면 (어두운 유리, broken이면 금이 많이 감) */
 export function makeScreenTexture({ size = 256, seed = 7, broken = false } = {}) {
   const rng = createRng(seed);

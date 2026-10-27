@@ -20,16 +20,27 @@ export class Stage {
     // 멀어질수록(깊이 떨어질수록) 어둠에 묻히게 해서 구덩이의 깊이감을 만든다
     this.scene.fog = new THREE.Fog(fogColor, 30, 62);
 
-    const cam = CONFIG.camera;
-    this.camera = new THREE.PerspectiveCamera(cam.fov, 1, 0.1, 250);
-    this.basePosition = new THREE.Vector3(...cam.position);
-    this.camera.position.copy(this.basePosition);
-    this.camera.lookAt(new THREE.Vector3(...cam.lookAt));
-
+    this.camera = new THREE.PerspectiveCamera(CONFIG.camera.fov, 1, 0.1, 250);
+    this.basePosition = new THREE.Vector3();
     this._shake = { time: 0, duration: 1, strength: 0 };
+    this._rumble = 0;
     this._addLights();
-    this.resize();
+    this.setView();
     window.addEventListener('resize', () => this.resize());
+  }
+
+  /** 고정 카메라 시점 { fov, position, lookAt }. 인자가 없으면 기본 시점(기호 타일 방) */
+  setView(view = CONFIG.camera) {
+    this.view = view;
+    this.basePosition.set(...view.position);
+    this.camera.position.copy(this.basePosition);
+    this.camera.lookAt(new THREE.Vector3(...view.lookAt));
+    this.resize();
+  }
+
+  /** 계속 이어지는 진동 세기 (0이면 멈춤). 매 프레임 미니게임이 정한다 */
+  setRumble(strength) {
+    this._rumble = strength;
   }
 
   _addLights() {
@@ -57,7 +68,7 @@ export class Stage {
     const aspect = w / h;
     this.camera.aspect = aspect;
     // 16:9보다 좁은 화면에서는 세로 시야각을 넓혀 바닥 양 끝이 잘리지 않게 한다
-    const baseFov = CONFIG.camera.fov;
+    const baseFov = this.view.fov;
     if (aspect < REF_ASPECT) {
       const t = Math.tan(THREE.MathUtils.degToRad(baseFov / 2)) * (REF_ASPECT / aspect);
       this.camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan(t));
@@ -74,9 +85,9 @@ export class Stage {
 
   render(dt) {
     const s = this._shake;
-    if (s.time > 0) {
-      s.time = Math.max(0, s.time - dt);
-      const k = s.strength * (s.time / s.duration);
+    s.time = Math.max(0, s.time - dt);
+    const k = Math.max(s.strength * (s.time / s.duration), this._rumble);
+    if (k > 0) {
       this.camera.position.set(
         this.basePosition.x + (Math.random() - 0.5) * 2 * k,
         this.basePosition.y + (Math.random() - 0.5) * 2 * k,

@@ -11,9 +11,11 @@ import { Hud } from './ui/hud.js';
 import { LobbyUI } from './ui/lobbyUI.js';
 import { symbolTilesDef } from './minigames/symbolTiles/symbolTilesGame.js';
 import { gridLayout } from './minigames/symbolTiles/symbolTilesRules.js';
+import { trainDodgeDef } from './minigames/trainDodge/trainDodgeGame.js';
 
 // 미니게임 등록: 새 미니게임을 만들면 여기에 한 줄 추가한다.
 registerMinigame(symbolTilesDef);
+registerMinigame(trainDodgeDef);
 
 document.title = CONFIG.title;
 

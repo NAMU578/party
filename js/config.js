@@ -14,7 +14,7 @@ export const CONFIG = {
 
   lobby: {
     defaultMaxPlayers: 4,
-    maxPlayersOptions: [2, 3, 4, 5, 6, 7, 8],
+    maxPlayersOptions: [2, 3, 4, 5, 6, 7, 8], // 열차 피하기 대피 구역(8칸)보다 많으면 안 됨
     defaultMatchRounds: 5,
     matchRoundsOptions: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     nameMaxLength: 12,
@@ -77,5 +77,36 @@ export const CONFIG = {
     dropGraceSeconds: 0.35, // 낙하 직후 이 시간 안에 떨어진 사람은 '동시 탈락'으로 묶음
     endCheckDelay: 1.0,     // 탈락 후 종료 여부를 판단하기까지 기다리는 시간 (동시 탈락 수집용)
     endHoldSeconds: 2.5,    // 종료가 결정된 뒤 결과 화면까지 기다리는 시간 (낙하 연출 감상)
+  },
+
+  trainDodge: {
+    // 통로와 대피 구역 (타일 한 칸 = 2.0)
+    corridorWidth: 4.0,     // 열차 폭과 같다
+    corridorLength: 14,     // 셔터(화면 위) ~ 아래 끝
+    alcovesPerSide: 4,      // 양쪽 4칸씩 8칸
+    alcovePitch: 3.5,       // 구역 간격 (통로 길이 / 한쪽 칸 수: 고르게 배치)
+    alcoveWidth: 1.2,       // 구역 입구 폭
+    alcoveDepth: 0.95,      // 이보다 깊으면 두 사람 발 중심이 동시에 구역 안에 들어갈 수 있다 (1.0 미만 유지)
+
+    // 턴 시간표 (턴 시작 후 초). 나머지 시각은 turnTimeline.js에서 이 값들로 계산한다.
+    shutterOpenAt: 2.0,     // 셔터가 열리기 시작 (진동·LED 시작)
+    shutterMoveTime: 1.0,   // 셔터가 열리거나 닫히는 데 걸리는 시간
+    pistonMoveTime: 0.3,    // 피스톤이 올라가거나 내려오는 시간
+    trainArriveAt: 7.0,     // 열차 앞부분이 셔터에 닿는 시각
+    trainCrossTime: 1.0,    // 앞부분이 통로 끝까지 가는 시간 (속도 = 통로 길이 / 이 값)
+    trainPassTime: 2.8,     // 앞부분이 아래 끝에 닿은 뒤 꼬리가 빠지기까지 (열차 길이 = 속도 × 이 값)
+    shakeFadeTime: 1.3,     // 꼬리가 빠진 뒤 진동이 멈추기까지
+    crushDelay: 2.8,        // 꼬리가 빠진 뒤 피스톤이 바닥에 닿기까지
+    nextTurnDelay: 1.0,     // 압착 후 다음 턴 시작까지
+
+    ledInterval: 0.25,      // 셔터 위 LED 두 개가 번갈아 켜지는 간격
+    shakeStart: 0.03,       // 셔터가 열릴 때 진동 세기
+    shakeMax: 0.2,          // 열차가 지나갈 때 진동 세기
+    crushShake: 0.3,        // 피스톤이 바닥에 닿을 때 한 번 흔들림
+
+    endCheckDelay: 1.0,     // 탈락 후 종료 여부를 판단하기까지 (동시 탈락 수집용)
+    endHoldSeconds: 2.5,    // 종료가 결정된 뒤 결과 화면까지
+
+    camera: { fov: 62, position: [0, 11, 10], lookAt: [0, 0, -1] }, // 통로 아래쪽 위에서 터널을 내려다봄 (넓은 화각)
   },
 };

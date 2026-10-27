@@ -39,7 +39,8 @@ JS 모듈을 쓰기 때문에 `index.html`을 더블클릭하면 동작하지 �
 | `js/player/` | 키보드 입력, 내 캐릭터 조작, 밀치기·충돌 계산(`pushRules.js`) |
 | `js/ui/` | 로비 화면, 게임 중 HUD·결과표 |
 | `js/minigames/symbolTiles/` | 기호 타일 미니게임 (규칙, 시간표, 타일, 벽 패널, 구덩이) |
-| `tests/` | 단위 테스트 (`node tests/rules.test.mjs`, `node tests/push.test.mjs`) |
+| `js/minigames/trainDodge/` | 열차 피하기 미니게임 (규칙, 턴 시간표, 통로, 피스톤·바닥등, 셔터·LED, 열차) |
+| `tests/` | 단위 테스트 (`node tests/rules.test.mjs`, `node tests/push.test.mjs`, `node tests/trainDodge.test.mjs`) |
 
 ## 미니게임 추가 방법
 
@@ -49,6 +50,7 @@ JS 모듈을 쓰기 때문에 `index.html`을 더블클릭하면 동작하지 �
    - 끝나면 방장이 `finish([[1등들], [2등들], ...])`를 호출한다. 같은 묶음은 공동 순위.
 2. `{ id, title, description, computeSpawns, create }` 형태의 정의 객체를 내보낸다 (`symbolTilesGame.js`의 `symbolTilesDef` 참고).
 3. `js/main.js`에 `registerMinigame(새정의)` 한 줄을 추가한다.
+4. 기호 타일 방 대신 자기 맵을 쓰려면 `mount()`에서 `room.group.visible = false`, `stage.setView(시점)`을 하고 `dispose()`에서 되돌린다 (`trainDodgeGame.js` 참고).
 
 ## 알아둘 점
 
@@ -58,3 +60,4 @@ JS 모듈을 쓰기 때문에 `index.html`을 더블클릭하면 동작하지 �
 - 탈락은 각자 자기 화면 기준으로 판정해서 방장에게 보고한다. 친구끼리 하는 용도라 조작 방지는 하지 않았다.
 - 밀치기 판정은 민 사람 화면 기준이고 방장이 거리를 한 번 더 확인한다. 맞은 사람 화면에서는 통신 지연만큼 조금 늦게 밀려날 수 있다.
 - 충돌은 각자 자기 캐릭터를 다른 사람에게서 밀어내는 방식이라, 지연이 크면 순간적으로 살짝 겹쳐 보일 수 있다.
+  열차 피하기에서 두 사람이 같은 구역에 동시에 뛰어들면 지연 동안 둘 다 들어가 보일 수 있지만, 구역 깊이가 1인용이라 곧 한 명이 밀려난다.
