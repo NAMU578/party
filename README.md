@@ -1,6 +1,7 @@
 # 파티 게임
 
 친구들과 브라우저에서 바로 하는 온라인 파티 게임. 미니게임을 랜덤 순서로 돌아가며 하고, 점수를 합산한다.
+한 라운드에서는 같은 미니게임을 두 판 연속으로 하고(`config.js`의 `flow.playsPerRound`), 두 판 점수를 합친 결과를 라운드 끝에 한 번 보여 준다.
 설치 없이 링크로 접속하며, 방장 브라우저가 판정을 맡는 P2P 방식(PeerJS)이다.
 
 ## 실행 방법
@@ -25,6 +26,7 @@ JS 모듈을 쓰기 때문에 `index.html`을 더블클릭하면 동작하지 �
 - WASD 또는 방향키: 이동 (한글 자판 상태에서도 동작)
 - 스페이스바: 밀치기. 앞에 있는 사람이 밀려나며 넘어지고, 누운 채 잠시 경직된 뒤 손을 짚고 일어난다 (일어나는 동작부터 이동 가능).
   넘어진 사람은 일어날 때까지 다시 맞지 않는다. 수치는 `config.js`의 `push`에서 조절한다.
+- 분류 작업에서는 걷기·밀치기 대신 스페이스바(예술품 버리기)와 엔터(장치 넘기기)만 쓴다.
 
 ## 폴더 구조
 
@@ -40,7 +42,8 @@ JS 모듈을 쓰기 때문에 `index.html`을 더블클릭하면 동작하지 �
 | `js/ui/` | 로비 화면, 게임 중 HUD·결과표 |
 | `js/minigames/symbolTiles/` | 기호 타일 미니게임 (규칙, 시간표, 타일, 벽 패널, 구덩이) |
 | `js/minigames/trainDodge/` | 열차 피하기 미니게임 (규칙, 턴 시간표, 통로, 피스톤·바닥등, 셔터·LED, 열차) |
-| `tests/` | 단위 테스트 (`node tests/rules.test.mjs`, `node tests/push.test.mjs`, `node tests/trainDodge.test.mjs`) |
+| `js/minigames/sortingLine/` | 분류 작업 미니게임 (규칙, 턴 시간표, 공장·소각로, 작업대, 벨트 위 물건 흐름, 물건 모형, 점수판, 카메라) |
+| `tests/` | 단위 테스트 (`node tests/rules.test.mjs`, `node tests/push.test.mjs`, `node tests/trainDodge.test.mjs`, `node tests/sortingLine.test.mjs`) |
 
 ## 미니게임 추가 방법
 
@@ -51,6 +54,7 @@ JS 모듈을 쓰기 때문에 `index.html`을 더블클릭하면 동작하지 �
 2. `{ id, title, description, computeSpawns, create }` 형태의 정의 객체를 내보낸다 (`symbolTilesGame.js`의 `symbolTilesDef` 참고).
 3. `js/main.js`에 `registerMinigame(새정의)` 한 줄을 추가한다.
 4. 기호 타일 방 대신 자기 맵을 쓰려면 `mount()`에서 `room.group.visible = false`, `stage.setView(시점)`을 하고 `dispose()`에서 되돌린다 (`trainDodgeGame.js` 참고).
+   카메라를 매 프레임 움직이려면 `stage.aim(위치, 바라볼 점)`, 맵을 어둡게 하려면 `stage.setLightLevel(배율)`을 쓰고 끝나면 1로 되돌린다 (`sortingGame.js` 참고).
 
 ## 알아둘 점
 

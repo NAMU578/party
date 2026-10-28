@@ -1,7 +1,7 @@
 // 키보드 입력. e.code(물리 키 위치)를 써서 한글 자판 상태에서도 WASD가 동작한다.
 const MOVE_KEYS = new Set(['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']);
 
-function isTyping(e) {
+export function isTyping(e) {
   const t = e.target;
   return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
 }

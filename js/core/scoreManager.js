@@ -19,6 +19,25 @@ export function rankGroupsToResults(groups, playerCount) {
   return rows;
 }
 
+/** key 내림차순으로 정렬하고 rank를 매긴다. 같은 값은 공동 순위 */
+function rankDescending(list, key) {
+  list.sort((a, b) => b[key] - a[key]);
+  list.forEach((e, i) => {
+    e.rank = i > 0 && list[i - 1][key] === e[key] ? list[i - 1].rank : i + 1;
+  });
+  return list;
+}
+
+/**
+ * 한 라운드(같은 미니게임 여러 판)의 판별 결과를 합친다. 획득 점수는 합, 순위는 합계 기준.
+ * @param {{ id: string, points: number }[][]} plays 판마다 rankGroupsToResults 결과
+ */
+export function combineRoundRows(plays) {
+  const sum = new Map();
+  for (const rows of plays) for (const r of rows) sum.set(r.id, (sum.get(r.id) ?? 0) + r.points);
+  return rankDescending([...sum].map(([id, points]) => ({ id, rank: 0, points })), 'points');
+}
+
 export class ScoreManager {
   constructor() {
     this.totals = new Map();
@@ -34,11 +53,6 @@ export class ScoreManager {
 
   /** 총점 내림차순, 동점은 공동 순위 */
   standings() {
-    const list = [...this.totals.entries()].map(([id, total]) => ({ id, total, rank: 0 }));
-    list.sort((a, b) => b.total - a.total);
-    list.forEach((e, i) => {
-      e.rank = i > 0 && list[i - 1].total === e.total ? list[i - 1].rank : i + 1;
-    });
-    return list;
+    return rankDescending([...this.totals.entries()].map(([id, total]) => ({ id, total, rank: 0 })), 'total');
   }
 }

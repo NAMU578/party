@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { CONFIG } from '../js/config.js';
 import { createRng } from '../js/core/random.js';
-import { rankGroupsToResults, ScoreManager } from '../js/core/scoreManager.js';
+import { combineRoundRows, rankGroupsToResults, ScoreManager } from '../js/core/scoreManager.js';
 import { buildMatchOrder } from '../js/core/minigameRegistry.js';
 import {
   applyRemoval,
@@ -92,6 +92,26 @@ assert.deepEqual(rankGroupsToResults([['A', 'B']], 2), [
   { id: 'A', rank: 1, points: 2 },
   { id: 'B', rank: 1, points: 2 },
 ]);
+// 한 라운드 두 판 합산: 획득 점수는 합, 순위는 합계 기준 (동점은 공동 순위)
+assert.deepEqual(
+  combineRoundRows([
+    rankGroupsToResults([['A'], ['B'], ['C']], 3),
+    rankGroupsToResults([['B'], ['A', 'C']], 3),
+  ]),
+  [
+    { id: 'A', rank: 1, points: 5 },
+    { id: 'B', rank: 1, points: 5 },
+    { id: 'C', rank: 3, points: 3 },
+  ],
+);
+// 두 번째 판 전에 나간 사람은 첫 판 점수만
+assert.deepEqual(
+  combineRoundRows([rankGroupsToResults([['A'], ['B']], 2), rankGroupsToResults([['A']], 1)]),
+  [
+    { id: 'A', rank: 1, points: 3 },
+    { id: 'B', rank: 2, points: 1 },
+  ],
+);
 const sm = new ScoreManager();
 sm.reset(['A', 'B', 'C']);
 sm.apply([{ id: 'A', points: 3 }, { id: 'B', points: 3 }, { id: 'C', points: 1 }]);

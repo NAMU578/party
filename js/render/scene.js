@@ -38,6 +38,18 @@ export class Stage {
     this.resize();
   }
 
+  /** 시점만 옮긴다 (화각은 그대로). 카메라를 매 프레임 움직이는 미니게임용 */
+  aim(position, lookAt) {
+    this.basePosition.copy(position);
+    this.camera.position.copy(position);
+    this.camera.lookAt(lookAt);
+  }
+
+  /** 기본 조명 밝기 배율 (1이 기본). 어두운 맵을 쓰는 미니게임이 정하고, 끝나면 1로 되돌린다 */
+  setLightLevel(k) {
+    for (const [light, base] of this._lights) light.intensity = base * k;
+  }
+
   /** 계속 이어지는 진동 세기 (0이면 멈춤). 매 프레임 미니게임이 정한다 */
   setRumble(strength) {
     this._rumble = strength;
@@ -59,6 +71,7 @@ export class Stage {
     fill.position.set(12, 10, 14);
 
     this.scene.add(hemi, key, key.target, fill);
+    this._lights = [hemi, key, fill].map((light) => [light, light.intensity]);
   }
 
   resize() {

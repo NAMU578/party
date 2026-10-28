@@ -10,7 +10,7 @@ export const MSG = Object.freeze({
   // 방장 → 참가자
   REJECT: 'reject', // { reason }
   LOBBY: 'lobby',   // { players, hostId, settings, code }
-  INTRO: 'intro',   // { gameId, round, total, roster, players, spawns, standings }
+  INTRO: 'intro',   // { gameId, round, total, play, plays, roster, players, spawns, standings }
   BEGIN: 'begin',
   SNAP: 'snap',     // { p: { id: [x, z, ry, mv] } }
   RESULT: 'result', // { rows, standings, round, total, last }

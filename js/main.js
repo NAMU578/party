@@ -12,10 +12,12 @@ import { LobbyUI } from './ui/lobbyUI.js';
 import { symbolTilesDef } from './minigames/symbolTiles/symbolTilesGame.js';
 import { gridLayout } from './minigames/symbolTiles/symbolTilesRules.js';
 import { trainDodgeDef } from './minigames/trainDodge/trainDodgeGame.js';
+import { sortingLineDef } from './minigames/sortingLine/sortingGame.js';
 
 // 미니게임 등록: 새 미니게임을 만들면 여기에 한 줄 추가한다.
 registerMinigame(symbolTilesDef);
 registerMinigame(trainDodgeDef);
+registerMinigame(sortingLineDef);
 
 document.title = CONFIG.title;
 

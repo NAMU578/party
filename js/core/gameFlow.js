@@ -1,14 +1,15 @@
 import { CONFIG } from '../config.js';
 import { MSG, makeMsg } from '../net/protocol.js';
 import { describeNetError } from '../net/network.js';
-import { ScoreManager, rankGroupsToResults } from './scoreManager.js';
+import { ScoreManager, combineRoundRows, rankGroupsToResults } from './scoreManager.js';
 import { buildMatchOrder, getMinigame } from './minigameRegistry.js';
 import { sanitizeName } from './session.js';
 import { PlayerView } from '../render/playerView.js';
 import { PlayerController } from '../player/playerController.js';
 
 /**
- * 파티 전체 흐름: 로비 → (미니게임 제목 → 플레이 → 결과) × 라운드 수 → 최종 순위 → 로비
+ * 파티 전체 흐름: 로비 → ((미니게임 제목 → 플레이) × 판 수 → 결과) × 라운드 수 → 최종 순위 → 로비
+ * 한 라운드는 같은 미니게임을 CONFIG.flow.playsPerRound판 연속으로 하고, 결과 화면은 라운드 끝에 한 번 뜬다.
  *
  * 방장 쪽(_host*)은 진행을 결정해서 메시지를 보내고,
  * 모든 플레이어 쪽(_client*)은 받은 메시지대로 화면을 바꾼다.
@@ -77,6 +78,8 @@ export class GameFlow {
       matchPlayers: [],
       order: [],
       matchIndex: 0,
+      play: 0,         // 이번 라운드에서 몇 번째 판인지 (0이면 라운드 시작 전)
+      roundRows: [],   // 이번 라운드에서 끝난 판들의 순위·점수
       roster: [],
       positions: {},
       knockUntil: {},  // 넘어져 있는 동안 (이 시각까지 밀 수도, 맞을 수도 없음)
@@ -126,6 +129,7 @@ export class GameFlow {
     this.scores.reset(H.matchPlayers);
     H.order = buildMatchOrder(H.settings.matchRounds);
     H.matchIndex = 0;
+    H.play = 0;
     this._startSnapshots();
     this._hostNextMinigame();
   }
@@ -179,12 +183,19 @@ export class GameFlow {
     const H = this.host;
     if (!H) return;
     clearTimeout(H.timer);
-    if (H.matchIndex >= H.order.length) {
-      this._hostEndMatch();
-      return;
+    if (H.play === 0 || H.play >= CONFIG.flow.playsPerRound) {
+      // 새 라운드
+      if (H.matchIndex >= H.order.length) {
+        this._hostEndMatch();
+        return;
+      }
+      H.matchIndex += 1;
+      H.play = 1;
+      H.roundRows = [];
+    } else {
+      H.play += 1; // 같은 미니게임 다음 판
     }
-    const gameId = H.order[H.matchIndex];
-    H.matchIndex += 1;
+    const gameId = H.order[H.matchIndex - 1];
     const def = getMinigame(gameId);
     const roster = H.matchPlayers.filter((id) => H.players.get(id) && !H.players.get(id).left);
     H.phase = 'intro';
@@ -200,6 +211,8 @@ export class GameFlow {
         gameId,
         round: H.matchIndex,
         total: H.order.length,
+        play: H.play,
+        plays: CONFIG.flow.playsPerRound,
         roster,
         players: this._hostPlayerList(true),
         spawns,
@@ -217,10 +230,15 @@ export class GameFlow {
   _hostMinigameFinished(groups) {
     const H = this.host;
     if (!H || H.phase !== 'playing') return;
-    H.phase = 'result';
     // 실제로 순위에 오른 인원 기준으로 점수를 매긴다 (시작 전에 나간 사람은 제외)
     const ranked = groups.reduce((n, g) => n + g.length, 0);
-    const rows = rankGroupsToResults(groups, ranked);
+    H.roundRows.push(rankGroupsToResults(groups, ranked));
+    if (H.play < CONFIG.flow.playsPerRound) {
+      this._hostNextMinigame(); // 결과 화면 없이 같은 미니게임 다음 판
+      return;
+    }
+    H.phase = 'result';
+    const rows = combineRoundRows(H.roundRows);
     this.scores.apply(rows);
     const standings = this.scores.standings();
     const totals = new Map(standings.map((s) => [s.id, s.total]));
@@ -431,8 +449,9 @@ export class GameFlow {
     this.minigameDef = def;
     this.minigame = def.create(this._minigameContext());
     this.minigame.mount();
-    this.roundText = `${msg.round} / ${msg.total}`;
-    this.hud.showIntro({ roundText: `${msg.round} / ${msg.total} 라운드`, title: def.title, description: def.description });
+    const playText = msg.plays > 1 ? ` · ${msg.play}판째` : '';
+    this.roundText = `${msg.round} / ${msg.total}${playText}`;
+    this.hud.showIntro({ roundText: `${msg.round} / ${msg.total} 라운드${playText}`, title: def.title, description: def.description });
     this._refreshHud();
   }
 
