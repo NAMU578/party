@@ -74,7 +74,7 @@ class SortingLineGame extends MinigameBase {
     this.ctx.local?.setControllable(false); // 이 게임에서는 걷기·밀치기 없음
     document.activeElement?.blur?.(); // 버튼에 포커스가 남아 있으면 엔터·스페이스가 버튼을 누르므로
     window.addEventListener('keydown', this._onKey);
-    this.ctx.hud.setHint('스페이스: 예술품 버리기 · 엔터: 장치 넘기기 · 틀리면 벨트가 잠깐 걸립니다');
+    this.ctx.hud.setHint('스페이스: 그림 버리기 · 엔터: 장치 넘기기 · 틀리면 벨트가 잠깐 걸립니다');
     if (this.isHost) this._hostBegin();
   }
 

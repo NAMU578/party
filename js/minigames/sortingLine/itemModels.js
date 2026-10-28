@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 // 벨트 위 물건 모형 (로우폴리). 종류·모양마다 한 번만 만들고 복제해서 쓴다 (형상·재질 공유).
 // 기준: 밑면이 y=0, 앞면이 +z (작업대에서는 작업자 쪽). 폭은 벨트 한 칸에 들어가게 0.72 이하.
-// 장치: 라디오, 브라운관 TV, 전화기, 카메라, 타자기 / 예술품: 액자 그림, 흉상, 도자기
+// 장치: 라디오, 브라운관 TV, 전화기, 카메라, 타자기 / 예술품: 액자 그림 (그림 4가지)
 
 const COLORS = {
   radio: [0x7a4a2a, 0x9e2f2a, 0x2f6f6a, 0xcdbb94],
@@ -10,7 +10,6 @@ const COLORS = {
   phone: [0x161616, 0x8f1f1f, 0xd9d2c0, 0x2f5f3a],
   camera: [0x1a1a1a, 0x4a3a24, 0x6a6a68, 0x22304a],
   typewriter: [0x1c2a22, 0x2a2a2a, 0x5a1f1f, 0x3a4a5a],
-  bust: [0xe6e1d6, 0x8a5a2a, 0xb0704a, 0x2e2e32],
 };
 const UP = [Math.PI / 2, 0, 0]; // 원기둥을 앞(+z)으로 눕힘
 
@@ -110,62 +109,6 @@ const PAINTINGS = [
   },
 ];
 
-// 도자기 무늬 4가지 (가로가 둘레 방향): 청화, 청자, 붉은 토기, 남색 금테
-const GLAZES = [
-  (g, w, h) => {
-    g.fillStyle = '#eef0f2';
-    g.fillRect(0, 0, w, h);
-    g.fillStyle = '#2a4f9a';
-    g.fillRect(0, h * 0.12, w, 3);
-    g.fillRect(0, h * 0.82, w, 3);
-    for (let x = 8; x < w; x += 21) {
-      g.beginPath();
-      g.arc(x, h * 0.47, 6, 0, Math.PI * 2);
-      g.fill();
-      g.fillRect(x - 1, h * 0.47, 2, 12);
-    }
-  },
-  (g, w, h) => {
-    g.fillStyle = '#9fbfa6';
-    g.fillRect(0, 0, w, h);
-    g.strokeStyle = 'rgba(40,62,46,0.35)';
-    g.lineWidth = 1;
-    for (let i = 0; i < 26; i++) {
-      const x = (i * 37) % w;
-      const y = (i * 23) % h;
-      g.beginPath();
-      g.moveTo(x, y);
-      g.lineTo(x + 9, y + 5);
-      g.lineTo(x + 14, y - 3);
-      g.stroke();
-    }
-  },
-  (g, w, h) => {
-    g.fillStyle = '#c4682f';
-    g.fillRect(0, 0, w, h);
-    g.fillStyle = '#1a1210';
-    g.fillRect(0, h * 0.38, w, h * 0.24);
-    g.strokeStyle = '#c4682f';
-    g.lineWidth = 2;
-    for (let x = 0; x < w; x += 16) {
-      g.beginPath();
-      g.moveTo(x + 2, h * 0.58);
-      g.lineTo(x + 2, h * 0.42);
-      g.lineTo(x + 12, h * 0.42);
-      g.lineTo(x + 12, h * 0.52);
-      g.lineTo(x + 7, h * 0.52);
-      g.stroke();
-    }
-  },
-  (g, w, h) => {
-    g.fillStyle = '#1d2f6e';
-    g.fillRect(0, 0, w, h);
-    g.fillStyle = '#d6b04a';
-    for (const y of [0.1, 0.18, 0.78, 0.86]) g.fillRect(0, h * y, w, 2);
-    for (let x = 6; x < w; x += 16) g.fillRect(x, h * 0.45, 4, 4);
-  },
-];
-
 const BUILD = {
   radio(k, look) {
     const body = k.mat(COLORS.radio[look], { roughness: 0.75 });
@@ -247,26 +190,6 @@ const BUILD = {
     k.add(new THREE.PlaneGeometry(W - 2 * T, H - 2 * T), picture, [0, H / 2, 0.005], null, tilt);
     k.add(new THREE.BoxGeometry(W - 2 * T, H - 2 * T, 0.01), back, [0, H / 2, -0.015], null, tilt);
     k.add(new THREE.BoxGeometry(0.06, 0.4, 0.04), back, [0, 0.18, -0.18], [0.45, 0, 0]); // 받침대
-    return k.group;
-  },
-  bust(k, look) {
-    const stone = k.mat(COLORS.bust[look], look === 1 ? { roughness: 0.35, metalness: 0.7 } : { roughness: 0.55 });
-    const base = k.mat(0x3a3530, { roughness: 0.7 });
-    k.add(new THREE.BoxGeometry(0.34, 0.1, 0.3), base, [0, 0.05, 0]); // 받침
-    k.add(new THREE.CylinderGeometry(0.08, 0.1, 0.06, 10), stone, [0, 0.13, 0]);
-    k.add(new THREE.SphereGeometry(0.2, 10, 6), stone, [0, 0.25, 0]).scale.set(1.25, 0.6, 0.7); // 어깨
-    k.add(new THREE.CylinderGeometry(0.055, 0.065, 0.12, 8), stone, [0, 0.39, 0]);
-    k.add(new THREE.IcosahedronGeometry(0.12, 1), stone, [0, 0.53, 0.01]).scale.set(0.95, 1.15, 1);
-    k.add(new THREE.BoxGeometry(0.035, 0.06, 0.05), stone, [0, 0.52, 0.125]); // 코
-    return k.group;
-  },
-  vase(k, look) {
-    const glaze = k.keep(new THREE.MeshStandardMaterial({ map: k.keep(canvasTexture(128, 64, GLAZES[look])), roughness: 0.25 }));
-    const profile = [
-      [0.001, 0], [0.12, 0], [0.15, 0.03], [0.21, 0.14], [0.22, 0.24], [0.17, 0.36],
-      [0.09, 0.45], [0.075, 0.52], [0.11, 0.58], [0.09, 0.585],
-    ].map(([x, y]) => new THREE.Vector2(x, y));
-    k.add(new THREE.LatheGeometry(profile, 14), glaze, [0, 0, 0]);
     return k.group;
   },
 };

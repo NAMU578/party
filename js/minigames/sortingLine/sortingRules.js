@@ -2,10 +2,10 @@ import { createRng, randInt } from '../../core/random.js';
 
 // 분류 작업 규칙 (순수 함수). 방장 판정과 각자 화면이 같은 함수를 써서 점수가 똑같이 나온다.
 
-export const BURN = 'b'; // 스페이스: 버리기 (예술품이 정답)
+export const BURN = 'b'; // 스페이스: 버리기 (예술품 = 그림이 정답)
 export const PASS = 'p'; // 엔터: 넘기기 (장치가 정답)
 export const DEVICE_KINDS = ['radio', 'tv', 'phone', 'camera', 'typewriter'];
-export const ART_KINDS = ['painting', 'bust', 'vase'];
+export const ART_KINDS = ['painting']; // 예술품은 그림만 (흉상·도자기까지 넣으면 너무 어려움)
 const LOOKS = 4; // 종류마다 색·그림 가짓수 (itemModels.js의 색·그림 목록 길이와 같아야 함)
 const TIME_SLACK = 0.02; // 시각 비교 여유 (반올림 오차)
 
