@@ -137,7 +137,8 @@ class DinnerMannersGame extends MinigameBase {
   /** 진행 중인 동작을 t까지 확인한다. 걸렸으면 false. 끝난 동작은 지운다 */
   _settleAct(t) {
     const act = this.myAct;
-    const hit = firstWatchIn(this.plan, act.start, Math.min(t, act.end));
+    let hit = firstWatchIn(this.plan, act.start, Math.min(t, act.end));
+    if (hit == null && this.host.alert && t < act.end) hit = t; // 총살 중인 집주인도 식탁을 보고 있다 (내 화면 기준)
     if (hit != null) {
       this._caught(hit);
       return false;

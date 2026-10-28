@@ -43,7 +43,7 @@ assert.ok(applyAct(d, STAB, 3, 1.0, CFG));
 assert.equal(d.plate, CFG.peasPerPlate - 3);
 assert.equal(d.fork, 3);
 assert.equal(canStart(d, 1.0 + CFG.stabTime / 2), false, '동작 중에는 새 동작 불가');
-assert.equal(applyAct(d, STAB, 1, 1.1, CFG), null, '동작 중에 온 입력은 무시');
+assert.equal(applyAct(d, STAB, 1, 1.0 + CFG.stabTime / 2, CFG), null, '동작 중에 온 입력은 무시');
 assert.equal(applyAct(d, EAT, 2, 1.0 + CFG.stabTime, CFG), null, '포크에 있는 개수 전부를 먹어야 함');
 assert.ok(applyAct(d, EAT, 3, 1.0 + CFG.stabTime, CFG));
 assert.equal(d.fork, 0);
@@ -134,7 +134,7 @@ assert.equal(paperDown(p1, looks[0].lower - 0.5), 0, '처음엔 신문으로 얼
 const lk = looks.find((l, i) => i > 2 && l.lower - looks[i - 1].to > 1); // 앞 look과 충분히 떨어진 것
 assert.equal(firstWatchIn(p1, lk.lower - 0.5, lk.lower - 0.1), null, '보기 전에 끝난 동작은 안전');
 assert.equal(firstWatchIn(p1, lk.lower - 0.2, lk.lower + CFG.warnTime * 0.9), null, '예고 시간 안에 끝나면 안전');
-near(firstWatchIn(p1, lk.lower - 0.2, lk.lower + 0.3), lk.from, '동작 중에 보기 시작하면 그 순간 걸림');
+near(firstWatchIn(p1, lk.lower - 0.2, lk.from + 0.1), lk.from, '동작 중에 보기 시작하면 그 순간 걸림');
 near(firstWatchIn(p1, lk.from + 0.05, lk.from + 0.4), lk.from + 0.05, '보고 있을 때 시작하면 바로 걸림');
 assert.equal(firstWatchIn(p1, lk.to + 0.01, lk.to + 0.3), null, '신문을 올리기 시작한 뒤는 안전');
 const wide = firstWatchIn(p1, looks[1].lower - 0.1, looks[5].to);

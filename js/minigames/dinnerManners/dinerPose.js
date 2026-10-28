@@ -10,7 +10,7 @@ import { Fork, Plate } from './plateView.js';
 const HIP = 0.55; // 의자에 앉은 엉덩이 높이
 const LEAN = 0.2; // 식탁 쪽으로 숙인 정도
 const LEGS = -1.35; // 무릎이 없는 인형이라 다리를 식탁 밑으로 뻗는다
-const ARM = { rest: -1.6, up: -1.95, down: -1.42, mouth: -2.1, dead: -1.5, done: -0.55 };
+const ARM = { rest: -1.6, down: -1.42, mouth: -2.1, dead: -1.5, done: -0.55 };
 const GRIP = { rest: 1.05, mouth: 3.84 }; // 손에 쥔 포크 기울기 (rest면 내려찍는 순간 포크가 수직)
 const LEFT = { rest: -1.15, done: -0.55, dead: -1.45 };
 const ARM_IN = -0.25; // 포크 쥔 팔을 몸 가운데 쪽으로 (어깨가 옆에 있어서 그대로 내리면 접시 밖을 찍음)
@@ -27,12 +27,11 @@ const lerp = (a, b, t) => a + (b - a) * t;
 const clamp01 = (x) => Math.min(1, Math.max(0, x));
 const ease = (x) => x * x * (3 - 2 * x);
 
-/** 찍기: 들어 올림 → 내려찍기(이때 콩이 꽂힘) → 잠깐 멈춤 → 제자리 */
+/** 찍기: 들어 올리지 않고 바로 쿡 내려찍고(이때 콩이 꽂힘) 제자리 — 연타할 수 있게 짧게 */
 function stabArm(p) {
-  if (p < 0.3) return lerp(ARM.rest, ARM.up, ease(p / 0.3));
-  if (p < 0.5) return lerp(ARM.up, ARM.down, ((p - 0.3) / 0.2) ** 2);
-  if (p < 0.68) return ARM.down;
-  return lerp(ARM.down, ARM.rest, ease((p - 0.68) / 0.32));
+  if (p < 0.4) return lerp(ARM.rest, ARM.down, (p / 0.4) ** 2);
+  if (p < 0.55) return ARM.down;
+  return lerp(ARM.down, ARM.rest, ease((p - 0.55) / 0.45));
 }
 
 /** 먹기: 포크를 입으로 (0 → 1) → 씹기 → 제자리 */
@@ -287,8 +286,8 @@ export class Diner {
       const p = clamp01(a.t / a.dur);
       if (a.kind === STAB) {
         arm = stabArm(p);
-        lean += 0.08 * Math.sin(Math.PI * clamp01((p - 0.3) / 0.4));
-        if (!a.applied && p >= 0.5) this._applyCounts(a);
+        lean += 0.05 * Math.sin(Math.PI * p);
+        if (!a.applied && p >= 0.4) this._applyCounts(a);
       } else if (a.kind === EAT) {
         const u = eatAmount(p);
         arm = lerp(ARM.rest, ARM.mouth, u);

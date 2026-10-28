@@ -102,6 +102,10 @@ export class HostFigure {
     this.yaw = 0;
     this.pitch = 0.1;
     this.aimDir = new THREE.Vector3(0, -0.3, 1).normalize();
+    this.shooting = false;
+    this.shownDown = 0; // 화면에 보이는 신문 내려간 정도
+    this.drawAt = 0;
+    this.alertAt = 0;
     this._disposables = [];
     this._build();
   }
@@ -202,11 +206,28 @@ export class HostFigure {
     g.add(this.gunGroup, this.flashLight);
   }
 
-  /** target(월드 좌표)을 쏜다. 쏘는 순간 onFire()를 부른다. 여러 명이면 shotGap 간격으로 차례대로 */
+  /**
+   * target(월드 좌표)을 쏜다. 쏘는 순간 onFire()를 부른다.
+   * 처음이면 지긋이 바라봄 → 천천히 총을 꺼냄 → 겨눈 채 긴장 → 발사. 이미 총을 들고 있으면 겨누기를 옮겨 switchTime 뒤 발사.
+   */
   queueShot(target, onFire) {
-    const last = this.shots.length ? this.shots[this.shots.length - 1].fireAt : -Infinity;
-    const fireAt = Math.max(this.time + this.cfg.aimTime, last + this.cfg.shotGap);
+    const cfg = this.cfg;
+    let fireAt;
+    if (this.shooting) {
+      const last = this.shots[this.shots.length - 1].fireAt;
+      fireAt = Math.max(this.time, last) + cfg.switchTime;
+    } else {
+      this.drawAt = this.time + cfg.stareTime;
+      this.alertAt = this.time + (this.shownDown > 0.99 ? 0 : cfg.warnTime); // 신문이 올라가 있었으면 내리는 동안은 아직 못 봄
+      fireAt = this.drawAt + cfg.drawTime + cfg.tensionTime;
+    }
     this.shots.push({ target: target.clone(), fireAt, onFire, fired: false });
+    this.shooting = true;
+  }
+
+  /** 총살 중이라 식탁을 보고 있는지 (이때 움직여도 걸린다) */
+  get alert() {
+    return this.shooting && this.time >= this.alertAt;
   }
 
   /** planDown: 시간표의 신문 내려간 정도 (0~1) */
@@ -225,13 +246,15 @@ export class HostFigure {
     const waiting = this.shots.some((s) => !s.fired);
     const lastFire = this.shots.length ? this.shots[this.shots.length - 1].fireAt : -Infinity;
     const shooting = waiting || T < lastFire + cfg.paperHold;
+    this.shooting = shooting;
     if (!shooting && this.shots.length > 1) this.shots = this.shots.slice(-1);
 
-    // 신문: 쏘는 동안은 내린 채. 보이는 신문은 시간표보다 늦게 올라가는 쪽으로만 달라진다 (위험할 때 내려가 있음)
+    // 신문: 총살 중에는 내린 채. 보이는 신문은 시간표보다 늦게 올라가는 쪽으로만 달라진다 (위험할 때 내려가 있음)
     this.hold = approach(this.hold, shooting ? 1 : 0, dt / (shooting ? cfg.lowerTime : cfg.raiseTime));
     const down = Math.max(planDown, ease(this.hold));
-    const gunUp = waiting || T < lastFire + 0.6;
-    this.gun = approach(this.gun, gunUp ? 1 : 0, dt / (gunUp ? 0.15 : 0.35));
+    this.shownDown = down;
+    const gunUp = shooting && T >= this.drawAt;
+    this.gun = approach(this.gun, gunUp ? 1 : 0, dt / (gunUp ? cfg.drawTime : 0.5));
     const g = ease(this.gun);
     this.recoil = Math.max(0, this.recoil - dt / 0.14);
     this.flashT += dt;
@@ -249,7 +272,7 @@ export class HostFigure {
       this.group.updateWorldMatrix(true, false);
       const local = this.group.worldToLocal(target.clone());
       const want = local.sub(R.shoulder).normalize();
-      this.aimDir.lerp(want, 1 - Math.exp(-18 * dt)).normalize();
+      this.aimDir.lerp(want, 1 - Math.exp(-5 * dt)).normalize(); // 다음 사람으로 천천히 겨누기를 옮김
     }
 
     // 손 위치: 왼손은 신문 왼쪽 끝, 오른손은 신문 오른쪽 끝 ↔ 겨누는 자세
@@ -273,7 +296,7 @@ export class HostFigure {
     // 고개: 쏠 때는 표적을, 내려다볼 때는 식탁을 천천히 훑는다
     let yaw = 0;
     let pitch = 0.08;
-    if (g > 0.05 && target) {
+    if (shooting && target) {
       yaw = Math.atan2(this.aimDir.x, this.aimDir.z);
       pitch = 0.3;
     } else if (down > 0.5) {

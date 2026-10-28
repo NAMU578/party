@@ -158,8 +158,8 @@ export const CONFIG = {
     // 집주인 시간표 (초). 신문이 내려가기 시작하고 warnTime이 지나면 '보는 중'
     firstDelay: [2.0, 4.0],   // 시작 후 처음 신문을 내리기까지 (범위 안에서 무작위)
     readTime: [1.5, 5.0],     // 신문을 다 올린 뒤 다음에 내리기까지
-    lowerTime: 1,          // 신문이 다 내려가는 시간
-    warnTime: 0.4,           // 내려가기 시작 → 보는 중 (반응할 수 있는 찰나)
+    lowerTime: 0.6,           // 신문이 다 내려가는 시간 (warnTime쯤 눈이 신문 위로 보이게 warnTime의 1.5배 정도로)
+    warnTime: 0.4,            // 내려가기 시작 → 보는 중 (반응할 수 있는 시간)
     raiseTime: 0.4,           // 신문을 다시 올리는 시간
     looks: {                  // 쳐다보는 방식: weight(나오는 비중), watch(보는 시간 범위)
       normal: { weight: 4, watch: [1.0, 2.0] },
@@ -168,10 +168,12 @@ export const CONFIG = {
       longStare: { weight: 1, watch: [2.5, 4.5] },  // 길게 쳐다봄
     },
 
-    // 총 (연출만, 판정과 무관)
-    aimTime: 3,             // 걸린 뒤 총을 쏘기까지
-    shotGap: 2,            // 여러 명을 연달아 쏠 때 간격
-    paperHold: 2.0,           // 쏜 뒤 신문을 내린 채 있는 시간
+    // 총살 연출. 집주인이 총을 들고 있는 동안은 계속 보고 있는 것으로 친다 (그동안 움직이면 같이 걸림)
+    stareTime: 1.0,           // 걸린 사람을 지긋이 바라보는 시간
+    drawTime: 1.2,            // 천천히 총을 꺼내 드는 시간
+    tensionTime: 2.0,         // 겨눈 채 쏘기 전까지 (긴장감)
+    switchTime: 1.0,          // 여러 명일 때 다음 사람으로 겨누기를 옮겨 쏘기까지
+    paperHold: 2.0,           // 마지막으로 쏜 뒤 신문을 내린 채 있는 시간
 
     seatSpacing: 1.15,        // 같은 줄 좌석 간격
     endHoldSeconds: 2.5,      // 끝난 뒤 결과 화면까지
