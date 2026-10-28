@@ -14,7 +14,7 @@ export const CONFIG = {
 
   lobby: {
     defaultMaxPlayers: 4,
-    maxPlayersOptions: [2, 3, 4, 5, 6, 7, 8], // 열차 피하기 대피 구역(8칸)·분류 작업 작업대 배치(8곳)보다 많으면 안 됨
+    maxPlayersOptions: [2, 3, 4, 5, 6, 7, 8], // 열차 피하기 대피 구역(8칸)·분류 작업 작업대 배치(8곳)·식사 예절 좌석(8석)보다 많으면 안 됨
     defaultMatchRounds: 5,
     matchRoundsOptions: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     nameMaxLength: 12,
@@ -143,5 +143,39 @@ export const CONFIG = {
     slamShake: 0.35,
     lightLevel: 0.5,          // 공장 안이 어둡도록 기본 조명을 줄이는 배율
     fov: 58,
+  },
+
+  dinnerManners: {
+    // 콩과 포크
+    peasPerPlate: 120,        // 접시마다 처음 콩 수 (전원 같음)
+    forkCapacity: 15,         // 포크에 꽂을 수 있는 최대 개수 (가득 찬 채로 찍으면 헛손질)
+    stabMin: 1,               // 한 번 찍을 때 꽂히는 개수 범위 (무작위)
+    stabMax: 3,
+    stabMissChance: 0.2,      // 콩이 하나도 안 찍힐 확률 (동작은 그대로 해서 위험도 같다)
+    stabTime: 0.4,            // 찍는 동작 시간: 이 동작이 집주인이 보는 시간과 겹치면 걸린다
+    eatTime: 0.6,             // 먹는 동작 시간
+
+    // 집주인 시간표 (초). 신문이 내려가기 시작하고 warnTime이 지나면 '보는 중'
+    firstDelay: [2.0, 4.0],   // 시작 후 처음 신문을 내리기까지 (범위 안에서 무작위)
+    readTime: [1.5, 5.0],     // 신문을 다 올린 뒤 다음에 내리기까지
+    lowerTime: 0.25,          // 신문이 다 내려가는 시간
+    warnTime: 0.15,           // 내려가기 시작 → 보는 중 (반응할 수 있는 찰나)
+    raiseTime: 0.4,           // 신문을 다시 올리는 시간
+    looks: {                  // 쳐다보는 방식: weight(나오는 비중), watch(보는 시간 범위)
+      normal: { weight: 4, watch: [1.0, 2.0] },
+      glance: { weight: 3, watch: [0.3, 0.6] },     // 흘깃 보고 바로 올림
+      doubleTake: { weight: 2, watch: [0.4, 0.8], halfRaise: [0.2, 0.3], again: [1.0, 2.0] }, // 올리다가(halfRaise < raiseTime) 다시 봄
+      longStare: { weight: 1, watch: [2.5, 4.5] },  // 길게 쳐다봄
+    },
+
+    // 총 (연출만, 판정과 무관)
+    aimTime: 0.3,             // 걸린 뒤 총을 쏘기까지
+    shotGap: 0.25,            // 여러 명을 연달아 쏠 때 간격
+    paperHold: 1.0,           // 쏜 뒤 신문을 내린 채 있는 시간
+
+    seatSpacing: 1.15,        // 같은 줄 좌석 간격
+    endHoldSeconds: 2.5,      // 끝난 뒤 결과 화면까지
+    lightLevel: 0.3,          // 창고 안이 어둡도록 기본 조명을 줄이는 배율 (식탁은 전등이 비춘다)
+    fov: 36,
   },
 };
